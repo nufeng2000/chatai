@@ -1,0 +1,26 @@
+name: CI
+
+on:
+  push:
+    branches: [ master ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18.x
+      - run: npm install
+      - run: npm install -g cordova
+      - run: cordova platform add android@11.0.0
+      - run: cordova build android
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: ChatAI
+          path: platforms/android/app/build/outputs/apk/debug/app-debug.apk

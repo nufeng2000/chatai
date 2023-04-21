@@ -1,0 +1,92 @@
+name: Build macOS release for ChatAI
+
+on:
+  create:
+    tags:
+      - 'v*.*.*'
+    branches:
+      - master
+jobs:
+  build:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18.x'
+
+      - name: Install Dependencies
+        run: |
+          npm install
+          npm install -g cordova electron-packager
+          cordova platform add electron
+          npm install electron-builder
+          mkdir ./platforms/electron/build
+
+      - name: Remove v prefix from tag name
+        id: tag_name
+        run: |
+          tag_name=$(echo "${{ github.ref }}" | sed 's/refs\/tags\///')
+          export tag_name=`echo $tag_name| sed 's/v//'`
+          echo ::set-output name=tag_name::${tag_name}
+
+      - name: add electronVersion Version
+        run: |
+          sed -i '' "s/\"version\"=\".*\"/\"version\"=\"${{ steps.tag_name.outputs.tag_name }}\"/" config.xml
+          sed -i '' "s/\"version\": \".*\"/\"version\": \"${{ steps.tag_name.outputs.tag_name }}\"/" package.json
+          export filePath="package.json"
+          export json=$(cat $filePath)
+          echo "$json" | jq '.+ {build: {"electronVersion": "24.1.2"}}' > tmpfile && mv tmpfile $filePath
+          cat config.xml
+          cp package.json platforms/electron/build/package.json
+
+      - name: Build Application
+        run: |
+          # build release for macOS
+          cordova build electron --release -- --mac --arch=x64
+
+      - name: Package Application
+        run: |
+          # package Electron app with electron-packager
+          electron-packager ./ ChatAI --platform=darwin --arch=x64 --out=./platforms/electron/build --overwrite --electron-version=24.1.2
+
+      - name: Upload Package Application artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: ChatAI(mac)
+          path: ./platforms/electron/build/ChatAI-${{ steps.tag_name.outputs.tag_name }}-mac.zip
+
+      - name: dir Build Application
+        run: |
+          ls -al ./platforms/electron/build/
+
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1.0.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.MY_PAT }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          draft: false
+          prerelease: false
+
+      - name: dir Build Application
+        run: |
+          ls -al  ./platforms/electron/build
+
+      - name: Upload Release Asset
+        id: upload-release-asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.MY_PAT }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./platforms/electron/build/ChatAI-${{ steps.tag_name.outputs.tag_name }}-mac.zip
+          asset_name: ChatAI(mac)
+          asset_content_type: application/zip
+

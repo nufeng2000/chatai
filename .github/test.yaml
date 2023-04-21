@@ -1,0 +1,61 @@
+name: Build Test
+on:
+  create:
+    tags:
+      - 'v*.*.*'
+    branches:
+      - master
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18.x'
+      - name: Install Dependencies
+        run: |
+          npm install
+          npm install -g cordova electron-packager
+          cordova platform add electron
+          npm install electron-builder
+          mkdir ./platforms/electron/build
+
+      - name: Remove 'v' prefix from tag name
+        run: |
+          $tag_name = $env:GITHUB_REF -replace '^refs/tags/v', ''
+          echo $tag_name
+          echo ::set-output name=tag_name::${tag_name}
+          (Get-Content config.xml) -replace "version=`"*`"", "version=`"${tag_name}`"" | Set-Content config.xml
+          (Get-Content package.json) -replace "version=`"*`"", "version=`"${tag_name}`"" | Set-Content package.json
+        shell: powershell
+
+      - name: add electronVersion Version
+        run: |
+          $filePath = "package.json"
+          $json = Get-Content $filePath | ConvertFrom-Json
+          if (-not $json.PSObject.Properties.Name.Contains('build')) {
+            $json | Add-Member -NotePropertyName 'build' -NotePropertyValue @{}
+          }
+          $json.build.electronVersion = "24.1.2"
+          $json | ConvertTo-Json -Depth 100 | Set-Content $filePath
+          cat package.json
+          cp package.json platforms/electron/build/package.json
+
+      - name: Build Application
+        run: |
+          cordova build electron --release -- --win --arch=x64
+
+      - name: Package Application
+        run: |
+          # package Electron app with electron-packager
+          electron-packager ./ ChatAI --platform=win32 --arch=x64 --out=./platforms/electron/build --overwrite  --electron-version=24.1.2
+
+      - name: dir Build Application
+        run: |
+          dir ./platforms/electron/build/
+          

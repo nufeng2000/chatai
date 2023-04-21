@@ -1,0 +1,87 @@
+name: Build  release for ChatAI(Windows)
+
+on:
+  create:
+    tags:
+      - 'v*.*.*'
+    branches:
+      - master
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+      - name: Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18.x'
+      - name: Install Dependencies
+        run: |
+          npm install
+          npm install -g cordova electron-packager
+          cordova platform add electron
+          npm install electron-builder
+          mkdir ./platforms/electron/build
+
+      - name: Remove 'v' prefix from tag name
+        run: |
+          $tag_name = $env:GITHUB_REF -replace '^refs/tags/v', ''
+          echo $tag_name
+          echo ::set-output name=tag_name::${tag_name}
+          (Get-Content config.xml) -replace "version=`"*`"", "version=`"${tag_name}`"" | Set-Content config.xml
+          (Get-Content package.json) -replace "version=`"*`"", "version=`"${tag_name}`"" | Set-Content package.json
+        shell: powershell
+
+      - name: add electronVersion Version
+        run: |
+          $filePath = "package.json"
+          $json = Get-Content $filePath | ConvertFrom-Json
+          if (-not $json.PSObject.Properties.Name.Contains('build')) {
+            $json | Add-Member -NotePropertyName 'build' -NotePropertyValue @{}
+          }
+          $json.build.electronVersion = "24.1.2"
+          $json | ConvertTo-Json -Depth 100 | Set-Content $filePath
+          cat package.json
+          cp package.json platforms/electron/build/package.json
+
+      - name: Build Application
+        run: |
+          cordova build electron --release -- --win --arch=x64
+
+      - name: Package Application
+        run: |
+          # package Electron app with electron-packager
+          electron-packager ./ ChatAI --platform=win32 --arch=x64 --out=./platforms/electron/build --overwrite  --electron-version=24.1.2
+
+      - name: dir Build Application
+        run: |
+          dir ./platforms/electron/build/
+
+      - name: Upload Package Application artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: ChatAI Setup ${{ env.tag }}.exe
+          path: ./platforms/electron/build/ChatAI Setup ${{ env.tag }}.exe
+
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1.0.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.MY_PAT }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          draft: false
+          prerelease: false
+
+      - name: Upload Release Asset
+        id: upload-release-asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.MY_PAT }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./platforms/electron/build/ChatAI Setup ${{ env.tag_name }}.exe
+          asset_name: ChatAI(Win32-X64)
+          asset_content_type: application/zip

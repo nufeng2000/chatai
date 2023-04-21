@@ -1,0 +1,94 @@
+name: Build Linux release for ChatAI
+
+on:
+  create:
+    tags:
+      - 'v*.*.*'
+    branches:
+      - master
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18.x'
+
+      - name: Install Dependencies
+        run: |
+          sudo apt-get update && sudo apt-get install -y npm
+          npm install -g cordova electron-packager          
+          cordova platform add electron
+          npm install electron-builder
+          mkdir ./platforms/electron/build
+
+      - name: add electronVersion Version
+        run: |
+          tag_name=$(echo "${{ github.ref }}" | sed 's/refs\/tags\///')
+          export tag_name=`echo $tag_name| sed 's/v//'`
+          sed -i "s/\"version\"=\".*\"/\"version\"=\"$tag_name\"/" config.xml
+          sed -i "s/\"version\": \".*\"/\"version\": \"$tag_name\"/" package.json
+          export filePath="package.json"
+          export json=$(cat $filePath)
+          echo "$json" | jq '.+ {build: {"electronVersion": "24.1.2"}}' > tmpfile && mv tmpfile $filePath
+          cat config.xml
+          cp package.json platforms/electron/build/package.json
+
+      - name: Build Application
+        run: |
+          # build release for Linux
+          cordova build electron --release -- --linux --arch=x64
+
+      - name: Package Application
+        run: |
+          # package Electron app with electron-packager
+          electron-packager ./ ChatAI --platform=linux --arch=x64 --out=./platforms/electron/build --overwrite --electron-version=24.1.2
+
+      - name: Remove v prefix from tag name
+        id: tag_name
+        run: |
+          tag_name=$(echo "${{ github.ref }}" | sed 's/refs\/tags\///')
+          export tag_name=`echo $tag_name| sed 's/v//'`
+          echo ::set-output name=tag_name::${tag_name}
+
+      - name: Upload Package Application artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: ChatAI(linux)
+          path: ./platforms/electron/build/com.github.nufeng1999-${{ steps.tag_name.outputs.tag_name }}.tar.gz
+
+      - name: dir Build Application
+        run: |
+          ls -al  ./platforms/electron/build
+          ls -al  ./platforms/electron/build/ChatAI-linux-x64
+
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1.0.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.MY_PAT }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          draft: false
+          prerelease: false
+
+      - name: dir Build Application
+        run: |
+          ls -al  ./platforms/electron/build/linux-unpacked
+
+      - name: Upload Release Asset
+        id: upload-release-asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.MY_PAT }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./platforms/electron/build/com.github.nufeng1999-${{ steps.tag_name.outputs.tag_name }}.tar.gz
+          asset_name: ChatAI(linux)
+          asset_content_type: application/zip
