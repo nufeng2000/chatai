@@ -9,9 +9,6 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "release": "changever.cmd && cp -r index.html www/ && cordova build android --release --  --packageType apk --keystore=chatai-release-key.keystore --alias=myalias --storePassword=cqcbit --password=cqcbit"
   },
-  "build": {
-    "electronVersion": "24.1.2"
-  },
   "keywords": [
     "ecosystem:cordova"
   ],

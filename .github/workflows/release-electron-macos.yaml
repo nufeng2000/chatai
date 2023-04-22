@@ -14,6 +14,10 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v3
 
+      - name: Get version
+        id: get_version
+        uses: battila7/get-version-action@v2
+
       - name: Node.js
         uses: actions/setup-node@v3
         with:
@@ -59,7 +63,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: ChatAI(mac)
-          path: ./platforms/electron/build/ChatAI-${{ steps.tag_name.outputs.tag_name }}-mac.zip
+          path: ./platforms/electron/build/ChatAI-${{ steps.get_version.outputs.version-without-v }}-mac.zip
 
       - name: dir Build Application
         run: |
@@ -87,7 +91,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.MY_PAT }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./platforms/electron/build/ChatAI-${{ steps.tag_name.outputs.tag_name }}-mac.zip
+          asset_path: ./platforms/electron/build/ChatAI-${{ steps.get_version.outputs.version-without-v }}-mac.zip
           asset_name: ChatAI(mac)
           asset_content_type: application/zip
 
