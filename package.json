@@ -1,13 +1,13 @@
 {
   "name": "com.github.nufeng1999",
   "displayName": "ChatAI",
-  "version": "0.0.5",
+  "version": "0.0.2",
   "description": "A sample Apache Cordova application that responds to the deviceready event.",
   "main": "index.html",
   "scripts": {
-    "debug": "changever.cmd && cp -r index.html www/ && cordova run android --debug --  --packageType apk --keystore=chatai-release-key.keystore --alias=myalias --storePassword=cqcbit --password=cqcbit",
+    "debug":   "changever.cmd && cp -rf res platforms/android/app/src/main/res && cp -r index.html www/ && cordova run android --debug --  --packageType apk --keystore=chatai-release-key.keystore --alias=myalias --storePassword=cqcbit --password=cqcbit",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "release": "changever.cmd && cp -r index.html www/ && cordova build android --release --  --packageType apk --keystore=chatai-release-key.keystore --alias=myalias --storePassword=cqcbit --password=cqcbit"
+    "release": "changever.cmd && cp -rf res platforms/android/app/src/main/res && cp -r index.html www/ && cordova build android --release --  --packageType apk --keystore=chatai-release-key.keystore --alias=myalias --storePassword=cqcbit --password=cqcbit"
   },
   "keywords": [
     "ecosystem:cordova"

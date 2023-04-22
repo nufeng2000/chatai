@@ -42,8 +42,9 @@ jobs:
           echo "$json" | jq '.+ {build: {"electronVersion": "24.1.2"}}' > tmpfile && mv tmpfile $filePath
           cat config.xml
           cp package.json platforms/electron/build/package.json
-          cp  favicon.png platforms/electron/build-res/installer.png
-          cp  index.html www/
+          cp -rf favicon.png platforms/electron/build-res/installer.png
+          cp -rf index.html www/
+
       - name: Build Application
         run: |
           # build release for Linux
