@@ -25,6 +25,7 @@ jobs:
         run: |
           npm install
           npm install -g cordova electron-packager
+#          npm install -g electron@24.1.2
           cordova platform add electron
           npm install electron-builder
           mkdir ./platforms/electron/build
@@ -52,7 +53,8 @@ jobs:
           }
           $json.build.electronVersion = "24.1.2"
           $json | ConvertTo-Json -Depth 100 | Set-Content $filePath
-
+          cp  favicon.png platforms/electron/build-res/installer.png
+          cp  index.html www/
       - name: Build Application
         run: |
           cordova build electron --release -- --win --arch=x64

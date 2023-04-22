@@ -87,6 +87,31 @@
 </body>
 </html>
 <script>
+    if (window.process && window.process.versions.electron) {
+
+        const {app, Menu} = require('electron');
+        // 禁用 Electron 菜单
+        Menu.setApplicationMenu(null);
+        app.on('ready', () => {
+            const win = new BrowserWindow({
+                // width: 800,
+                // height: 600,
+                autoHideMenuBar: true // 自动隐藏菜单栏
+            });
+        });
+        // app.on('ready', () => {
+        //     // ...
+        // })
+        // // 创建新的菜单
+        // const template = [
+        //     // ...
+        // ];
+        // const menu = Menu.buildFromTemplate(template);
+        // // 将菜单分配给 BrowserWindow 实例
+        // const win = new BrowserWindow({width: 1024, height: 768});
+        // win.setMenu(menu);
+    }
+
     function loadScript(src) {
         return new Promise(function (resolve, reject) {
             var script = document.createElement('script');

@@ -5,6 +5,7 @@
     <author email="dev@cordova.apache.org" href="https://cordova.apache.org">
         Apache Cordova Team
     </author>
+    <engine name="electron" version="24.1.2" />
     <content src="index.html" />
     <access origin="*"/>
     <allow-navigation href="*"/>
