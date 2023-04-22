@@ -37,9 +37,11 @@ jobs:
       - name: Set output
         id: tag_name
         run: |
-          $tag_name = $env:GITHUB_REF -replace '^refs/tags/v', ''
-          echo "::set-output name=tag_name::${$tag_name}"
-
+          $env:tag_name = $env:GITHUB_REF -replace '^refs/tags/v', ''
+#          echo "::set-output name=tag_name::${$tag_name}"
+          echo "tag_name=$env:tag_name" >> $GITHUB_ENV
+          # Set the output parameter
+          echo "::set-output name=tag_name::{tag_name}"
       - name: add electronVersion Version
         run: |
           $filePath = "package.json"
@@ -50,7 +52,10 @@ jobs:
           $json.build.electronVersion = "24.1.2"
           $json | ConvertTo-Json -Depth 100 | Set-Content $filePath
           cat package.json
-
+          echo "${{ steps.tag_name.outputs.tag_name }}"
+          echo "$env:tag_name"
+          echo "${{env:tag_name}}"
+          echo "${{env.tag_name}}"
       - name: Build Application
         run: |
           cordova build electron --release -- --win --arch=x64
