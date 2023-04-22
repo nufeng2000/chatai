@@ -25,6 +25,7 @@ jobs:
           mkdir ./platforms/electron/build
 
       - name: Remove 'v' prefix from tag name
+        id: tag_name
         run: |
           $tag_name = $env:GITHUB_REF -replace '^refs/tags/v', ''
           echo $tag_name
@@ -65,8 +66,8 @@ jobs:
       - name: Upload Package Application artifacts
         uses: actions/upload-artifact@v2
         with:
-          name: ChatAI Setup ${{ env.tag }}.exe
-          path: ./platforms/electron/build/ChatAI Setup ${{ env.tag }}.exe
+          name: ChatAI Setup ${{ steps.tag_name.outputs.tag_name }}.exe
+          path: ./platforms/electron/build/ChatAI Setup ${{ steps.tag_name.outputs.tag_name }}.exe
 
       - name: Create Release
         id: create_release
@@ -85,7 +86,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.MY_PAT }}
         with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./platforms/electron/build/ChatAI Setup ${{ env.tag_name }}.exe
+          upload_url: ${{ steps.tag_name.outputs.tag_name }}
+          asset_path: ./platforms/electron/build/ChatAI Setup ${{ steps.tag_name.outputs.tag_name }}.exe
           asset_name: ChatAI(Win32-X64)
           asset_content_type: application/zip
