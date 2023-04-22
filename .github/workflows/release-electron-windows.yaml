@@ -42,7 +42,7 @@ jobs:
           echo "tag_name=$env:tag_name" >> $GITHUB_ENV
           # Set the output parameter
           echo "::set-output name=tag_name::{tag_name}"
-        shell: powershell
+
       - name: add electronVersion Version
         run: |
           $filePath = "package.json"
@@ -57,28 +57,24 @@ jobs:
           echo "$env:tag_name"
           echo "${{ env:tag_name }}"
           echo "${{ env.tag_name }}"
-        shell: powershell
+
       - name: Build Application
         run: |
           cordova build electron --release -- --win --arch=x64
 
-        shell: powershell
       - name: dir Build Application
         run: |
           dir ./platforms/electron/build/ChatAI*
 
-        shell: powershell
       - name: Package Application
         run: |
           # package Electron app with electron-packager
           electron-packager ./ ChatAI --platform=win32 --arch=x64 --out=./platforms/electron/build --overwrite  --electron-version=24.1.2
 
-        shell: powershell
       - name: dir Build Application
         run: |
           dir ./platforms/electron/build/
 
-        shell: powershell
       - name: Upload Package Application artifacts
         uses: actions/upload-artifact@v2
         with:
