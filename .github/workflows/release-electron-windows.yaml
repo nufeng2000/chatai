@@ -54,8 +54,8 @@ jobs:
           cat package.json
           echo "${{ steps.tag_name.outputs.tag_name }}"
           echo "$env:tag_name"
-          echo "${{env:tag_name}}"
-          echo "${{env.tag_name}}"
+          echo "${{ env:tag_name }}"
+          echo "${{ env.tag_name }}"
       - name: Build Application
         run: |
           cordova build electron --release -- --win --arch=x64
