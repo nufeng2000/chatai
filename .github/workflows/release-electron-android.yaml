@@ -26,24 +26,26 @@ jobs:
         run: |
           npm install -g cordova
           cordova platform add android@11.0.0
+
       - name: Change res
         run: | 
-          cp -rf res/* platforms/android/app/src/main/res
-          cp -r index.html www/
+          cp -rf res/* platforms/android/app/src/main
+          cp -rf index.html www/
+
       - name: cordova prepare
         run: cordova prepare
+
       - name: Change Version
         run: |
           tag_name=$(echo "${{ github.ref }}" | sed 's/refs\/tags\///')
           tag_name=`echo $tag_name| sed 's/v//'`
-          cp -rf res platforms/android/app/src/main
           sed -i "s/\"version\"=\".*\"/\"version\"=\"$tag_name\"/" config.xml
           sed -i "s/\"version\"=\".*\"/\"version\"=\"$tag_name\"/" platforms/android/app/src/main/res/xml/config.xml
           sed -i "s/\"version\": \".*\"/\"version\": \"$tag_name\"/" package.json
           sed -i "s/\"versionName\"=\".*\"/\"versionName\"=\"$tag_name\"/" platforms/android/app/src/main/AndroidManifest.xml
           sed -i "s/versionName=\".*\"/versionName=\"$tag_name\"/" platforms/android/CordovaLib/AndroidManifest.xml
           sed -i "s/versionCode=\".*\"/versionCode=\"$tag_name\"/" platforms/android/CordovaLib/AndroidManifest.xml
-          cp -rf index.html www/
+
       - name: Upload Version artifacts
         uses: actions/upload-artifact@v2
         with:
@@ -56,6 +58,7 @@ jobs:
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
           STORE_PASSWORD: ${{ secrets.STORE_PASSWORD }}
+
       - name: Upload build artifacts
         uses: actions/upload-artifact@v2
         with:
