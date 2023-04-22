@@ -12,6 +12,11 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
+
+      - name: Get version
+        id: get_version
+        uses: battila7/get-version-action@v2
+
       - name: Node.js
         uses: actions/setup-node@v3
         with:
@@ -36,10 +41,7 @@ jobs:
 
       - name: Set output
         run: |
-          $env:tag_name = $env:GITHUB_REF -replace '^refs/tags/v', ''
-          echo "tag_name=$env:tag_name" >> $GITHUB_ENV
-          echo "::set-output name=tag_name::{tag_name}"
-        id: tag_name
+          echo "${{ steps.get_version.outputs.version-without-v }}"
 
       - name: add electronVersion Version
         run: |
@@ -50,10 +52,6 @@ jobs:
           }
           $json.build.electronVersion = "24.1.2"
           $json | ConvertTo-Json -Depth 100 | Set-Content $filePath
-          cat package.json
-          echo "${{ steps.tag_name.outputs.tag_name }}"
-          echo "$env:tag_name"
-          echo "${{ env.tag_name }}"
 
       - name: Build Application
         run: |
@@ -75,8 +73,8 @@ jobs:
       - name: Upload Package Application artifacts
         uses: actions/upload-artifact@v2
         with:
-          name: ChatAI Setup ${{ env.tag_name }}.exe
-          path: ./platforms/electron/build/ChatAI Setup ${{ steps.tag_name.outputs.tag_name }}.exe
+          name: ChatAI Setup ${{ steps.get_version.outputs.version-without-v }}.exe
+          path: ./platforms/electron/build/ChatAI Setup ${{ steps.get_version.outputs.version-without-v }}.exe
 
       - name: Create Release
         id: create_release
@@ -96,6 +94,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.MY_PAT }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./platforms/electron/build/ChatAI Setup ${{ steps.tag_name.outputs.tag_name }}.exe
-          asset_name: ChatAI Setup ${{ steps.tag_name.outputs.tag_name }}.exe
+          asset_path: ./platforms/electron/build/ChatAI Setup ${{ steps.get_version.outputs.version-without-v }}.exe
+          asset_name: ChatAI Setup ${{ steps.get_version.outputs.version-without-v }}.exe
           asset_content_type: application/zip
