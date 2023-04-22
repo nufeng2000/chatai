@@ -28,6 +28,7 @@ jobs:
         id: tag_name
         run: |
           $tag_name = $env:GITHUB_REF -replace '^refs/tags/v', ''
+          set tag_name=$tag_name
           echo $tag_name
           echo ::set-output name=tag_name::${tag_name}
           (Get-Content config.xml) -replace "version=`".*?`"", "version=`"${tag_name}`"" | Set-Content config.xml
@@ -66,8 +67,8 @@ jobs:
       - name: Upload Package Application artifacts
         uses: actions/upload-artifact@v2
         with:
-          name: ChatAI Setup ${{ steps.tag_name.outputs.tag_name }}.exe
-          path: ./platforms/electron/build/ChatAI Setup ${{ steps.tag_name.outputs.tag_name }}.exe
+          name: ChatAI Setup ${{ env.tag_name }}.exe
+          path: ./platforms/electron/build/ChatAI Setup ${{ env.tag_name }}.exe
 
       - name: Create Release
         id: create_release
@@ -86,7 +87,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.MY_PAT }}
         with:
-          upload_url: ${{ steps.tag_name.outputs.tag_name }}
-          asset_path: ./platforms/electron/build/ChatAI Setup ${{ steps.tag_name.outputs.tag_name }}.exe
-          asset_name: ChatAI(Win32-X64)
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./platforms/electron/build/ChatAI Setup ${{ env.tag_name }}.exe
+          asset_name: ChatAI Setup ${{ env.tag_name }}.exe
           asset_content_type: application/zip
