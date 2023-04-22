@@ -31,6 +31,7 @@ jobs:
           echo ::set-output name=tag_name::${tag_name}
           (Get-Content config.xml) -replace "version=`"*`"", "version=`"${tag_name}`"" | Set-Content config.xml
           (Get-Content package.json) -replace "version=`"*`"", "version=`"${tag_name}`"" | Set-Content package.json
+          cat config.xml
         shell: powershell
 
       - name: add electronVersion Version
@@ -47,7 +48,12 @@ jobs:
 
       - name: Build Application
         run: |
+          cordova-check-plugins --config=config.xml
           cordova build electron --release -- --win --arch=x64
+
+      - name: dir Build Application
+        run: |
+          dir ./platforms/electron/build/ChatAI-win32-x64
 
       - name: Package Application
         run: |
