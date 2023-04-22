@@ -51,7 +51,7 @@ jobs:
 
       - name: dir Build Application
         run: |
-          dir ./platforms/electron/build/ChatAI-win32-x64
+          dir ./platforms/electron/build/ChatAI*
 
       - name: Package Application
         run: |
