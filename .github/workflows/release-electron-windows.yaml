@@ -25,7 +25,6 @@ jobs:
           mkdir ./platforms/electron/build
 
       - name: Remove 'v' prefix from tag name
-        id: tag_name
         run: |
           $tag_name = $env:GITHUB_REF -replace '^refs/tags/v', ''
           set tag_name=$tag_name
@@ -35,6 +34,11 @@ jobs:
           (Get-Content package.json) -replace "version=`".*?`"", "version=`"${tag_name}`"" | Set-Content package.json
           cat config.xml
         shell: powershell
+      - name: Set output
+        id: tag_name
+        run: |
+          $tag_name = $env:GITHUB_REF -replace '^refs/tags/v', ''
+          echo "::set-output name=tag_name::${$tag_name}"
 
       - name: add electronVersion Version
         run: |
@@ -68,7 +72,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: ChatAI Setup ${{ env.tag_name }}.exe
-          path: ./platforms/electron/build/ChatAI Setup ${{ env.tag_name }}.exe
+          path: ./platforms/electron/build/ChatAI Setup ${{ steps.tag_name.outputs.tag_name }}.exe
 
       - name: Create Release
         id: create_release
@@ -88,6 +92,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.MY_PAT }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./platforms/electron/build/ChatAI Setup ${{ env.tag_name }}.exe
-          asset_name: ChatAI Setup ${{ env.tag_name }}.exe
+          asset_path: ./platforms/electron/build/ChatAI Setup ${{ steps.tag_name.outputs.tag_name }}.exe
+          asset_name: ChatAI Setup ${{ steps.tag_name.outputs.tag_name }}.exe
           asset_content_type: application/zip
