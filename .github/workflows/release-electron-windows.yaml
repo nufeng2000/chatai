@@ -29,8 +29,8 @@ jobs:
           $tag_name = $env:GITHUB_REF -replace '^refs/tags/v', ''
           echo $tag_name
           echo ::set-output name=tag_name::${tag_name}
-          (Get-Content config.xml) -replace "version=`"*`"", "version=`"${tag_name}`"" | Set-Content config.xml
-          (Get-Content package.json) -replace "version=`"*`"", "version=`"${tag_name}`"" | Set-Content package.json
+          (Get-Content config.xml) -replace "version=`".*?`"", "version=`"${tag_name}`"" | Set-Content config.xml
+          (Get-Content package.json) -replace "version=`".*?`"", "version=`"${tag_name}`"" | Set-Content package.json
           cat config.xml
         shell: powershell
 
@@ -47,7 +47,6 @@ jobs:
 
       - name: Build Application
         run: |
-          cordova-check-plugins --config=config.xml
           cordova build electron --release -- --win --arch=x64
 
       - name: dir Build Application
