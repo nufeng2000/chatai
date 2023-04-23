@@ -1,0 +1,18 @@
+{
+  "browserWindow": {
+    "title": "ChatAI",
+    "icon": "../favicon.ico",
+    "tabbingIdentifier": "ChatAI",
+    "autoHideMenuBar": true,
+    "webPreferences": {
+      "nodeIntegration": true,
+      "nativeWindowOpen": true,
+      "tabbing": true
+    }
+  },
+  "browserWindowInstance": {
+    "loadURL": {
+      "url1": "index.html"
+    }
+  }
+}

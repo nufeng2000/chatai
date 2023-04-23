@@ -1,11 +1,11 @@
 {
-  "name": "com.github.nufeng1999",
+  "name": "com.github.nufeng1999.chatai",
   "displayName": "ChatAI",
   "version": "0.0.2",
   "description": "A sample Apache Cordova application that responds to the deviceready event.",
-  "main": "index.html",
+  "main": "main.js",
   "scripts": {
-    "debug":   "changever.cmd && cp -rf res platforms/android/app/src/main/res && cp -r index.html www/ && cordova run android --debug --  --packageType apk ",
+    "debug": "changever.cmd && cp -rf res platforms/android/app/src/main/res && cp -r index.html www/ && cordova run android --debug --  --packageType apk ",
     "test": "echo \"Error: no test specified\" && exit 1",
     "release": "changever.cmd && cp -rf res platforms/android/app/src/main/res && cp -r index.html www/ && cordova build android --release --  --packageType apk "
   },
@@ -17,7 +17,8 @@
   "cordova": {
     "platforms": [
       "android",
-      "electron"
+      "electron",
+      "browser"
     ],
     "plugins": {
       "cordova-plugin-splashscreen": {},
@@ -31,15 +32,17 @@
   },
   "devDependencies": {
     "cordova-android": "^11.0.0",
+    "cordova-browser": "^6.0.0",
     "cordova-electron": "^3.1.0",
     "cordova-plugin-file": "^7.0.0",
     "cordova-plugin-file-opener2": "^4.0.0",
     "cordova-plugin-splashscreen": "^6.0.1",
     "cordova-plugin-tts": "^0.2.3",
     "cordova-plugin-x-socialsharing": "^6.0.4",
+    "electron": "^24.1.2",
     "es6-promise-plugin": "^4.2.2"
   },
   "dependencies": {
-    "electron-builder": "24.1.2"
+    "electron-builder": "^23.6.0"
   }
 }

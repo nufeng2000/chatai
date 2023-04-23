@@ -87,6 +87,9 @@
 </body>
 </html>
 <script>
+    var {app,Menu} = require('app');  // 控制应用生命周期的模块。
+    var BrowserWindow = require('browser-window');  // 创建原生浏览器窗口的模块
+    Menu.setApplicationMenu(null);
     if (window.process && window.process.versions.electron) {
 
         const {app, Menu} = require('electron');
