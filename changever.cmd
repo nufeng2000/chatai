@@ -1,4 +1,4 @@
-set tag_name=0.0.2
+set tag_name=0.0.5
 sed -i "s/\"version\"=\".*\"/\"version\"=\"%tag_name%\"/" config.xml
 sed -i "s/\"version\"=\".*\"/\"version\"=\"%tag_name%\"/" platforms/android/app/src/main/res/xml/config.xml
 sed -i "s/\"version\": \".*\"/\"version\": \"%tag_name%\"/" package.json

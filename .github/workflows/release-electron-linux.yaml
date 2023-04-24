@@ -25,6 +25,7 @@ jobs:
 
       - name: Install Dependencies
         run: |
+          cp -f package.json electron/
           sudo apt-get update && sudo apt-get install -y npm
           npm install -g cordova electron-packager          
           cordova platform add electron

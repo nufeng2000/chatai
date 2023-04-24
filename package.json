@@ -1,7 +1,7 @@
 {
   "name": "com.github.nufeng1999.chatai",
   "displayName": "ChatAI",
-  "version": "0.0.2",
+  "version": "0.0.5",
   "description": "A sample Apache Cordova application that responds to the deviceready event.",
   "main": "main.js",
   "scripts": {

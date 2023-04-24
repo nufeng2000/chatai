@@ -13,7 +13,7 @@
     <style>
         .container {
             position: relative;
-            height: 100vh; /* 设置高度为视口的高度，以便使内容垂直居中 */
+            height: 100%; /* 设置高度为视口的高度，以便使内容垂直居中 */
         }
 
         .content {
@@ -22,17 +22,17 @@
             left: 50%; /* 让元素水平居中 */
             transform: translate(-50%, -50%); /* 通过 transform 属性偏移元素，使文本上下左右居中 */
         }
-
         .content span {
             display: inline-block; /* 需要把内层元素设置为 inline-block，以便水平居中 */
             text-align: center; /* 水平居中 */
         }
     </style>
+    <script type="text/javascript" src="cordova.js"></script>
 </head>
 <body>
-<div id="startpage" class="container">
-    <div class="content">
-        <span>正在努力加载中......</span>
+<div id="startpage" className="container" style="position: relative; height: 100%;">
+    <div className="content" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
+        <span style="display: inline-block; text-align: center;">正在努力加载中......</span>
         <div>
             <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
                  style="opacity: 1.0;margin: auto;
@@ -87,6 +87,9 @@
 </body>
 </html>
 <script>
+    var {app,Menu} = require('app');  // 控制应用生命周期的模块。
+    var BrowserWindow = require('browser-window');  // 创建原生浏览器窗口的模块
+    Menu.setApplicationMenu(null);
     if (window.process && window.process.versions.electron) {
 
         const {app, Menu} = require('electron');
@@ -116,27 +119,59 @@
         return new Promise(function (resolve, reject) {
             var script = document.createElement('script');
             script.type = 'text/javascript';
-            script.src = "."+src;
+            script.src = 'file:///android_asset/www' + src;
             script.onload = resolve;
             script.onerror = reject;
             document.head.appendChild(script);
         });
     }
 
-    fetch('./asset-manifest.json')
-        .then(response => response.json())
-        .then(data => {
-            const mainJsFileName = data.files["main.js"];
-            var scripts = [
-                mainJsFileName,
-            ];
-            Promise.all(scripts.map(loadScript))
-                .then(function () {
-                    document.getElementById("startpage").hidden = true;
-                })
-                .catch(function () {
-                    console.log('Error occurred while loading script.');
+    document.addEventListener("deviceready", onDeviceReady, false);
+
+    function onDeviceReady() {
+        var filePath = 'file:///android_asset/www/asset-manifest.json';
+
+        window.resolveLocalFileSystemURL(
+            filePath,
+            function (fileEntry) {
+                // 获取文件
+                fileEntry.file(function (file) {
+
+                    // 创建一个 FileReader 对象
+                    var reader = new FileReader();
+                    reader.onerror = function (event) {
+                        // alert("Failed to read file!\n\n" + reader.error);
+                        reader.abort(); // (...does this do anything useful in an onerror handler?)
+                    }
+                    // 读取文件内容
+                    reader.onload = function (event) {
+                        var contents = event.target.result; // 获取文件内容
+                        // 如果请求成功，则在控制台输出响应的数据
+                        console.log(contents);
+                        // 将 JSON 字符串转换为 JavaScript 对象
+                        var data = JSON.parse(contents);
+                        const mainJsFileName = data.files["main.js"];
+                        var scripts = [
+                            mainJsFileName,
+                        ];
+                        Promise.all(scripts.map(loadScript))
+                            .then(function () {
+                                document.getElementById("startpage").hidden = true;
+                            })
+                            .catch(function () {
+                                // console.log('Error occurred while loading script.');
+                            });
+                        // console.log('file content:', this.result);
+                    };
+
+                    // 以文本格式读取文件
+                    reader.readAsText(file);
                 });
-        })
-        .catch(error => console.error(error));
+            },
+            function (error) {
+                // console.log('未找到文件：' + error);
+            });
+
+    };
+
 </script>
