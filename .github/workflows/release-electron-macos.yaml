@@ -25,7 +25,6 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          cp -f package.json electron/
           npm install
           npm install -g cordova electron-packager
           cordova platform add electron

@@ -24,7 +24,6 @@ jobs:
 
       - name: Install Cordova and dependencies
         run: |
-          cp -f package.json electron/
           npm install -g cordova
           cordova platform add android@11.0.0
 
