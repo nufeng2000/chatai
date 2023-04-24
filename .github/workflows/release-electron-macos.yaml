@@ -47,7 +47,7 @@ jobs:
           echo "$json" | jq '.+ {build: {"electronVersion": "24.1.2"}}' > tmpfile && mv tmpfile $filePath
           cat config.xml
           cp  installer512.png platforms/electron/build-res/installer.png
-          cp  index.html www/
+          cp  index2.html www/
       - name: Build Application
         run: |
           # build release for macOS
